@@ -1,8 +1,11 @@
 # debug-k8s-pipeline
 
-Notes on interactive debugging within a Jenkins CI pipeline, running within Kubernetes.
+Code examples for my
+[Interactive debugging within a Jenkins container running on Kubernetes](https://adamrushuk.github.io/interactive-debugging-within-a-jenkins-container-running-on-kubernetes/) blog post.
 
-## Problem - Why debug within the pipeline?
+## Demo Notes
+
+### Problem - Why debug within the pipeline?
 
 Several main issues:
 
@@ -15,7 +18,7 @@ Several main issues:
   - no "pause on error" functionality
   - need terminal session attached
 
-## Solution
+### Solution
 
 The solution was to follow these steps:
 
@@ -26,7 +29,7 @@ The solution was to follow these steps:
 1. Attach to the screen session.
 1. Use an interactive debugger, like the Ansible playbook debugger.
 
-## Demo - Debugging within the pipeline
+### Live Demo - Debugging within a Jenkins pipeline running on Kubernetes
 
 1. VSCode: `F1 > Screencast Mode`
 1. Start Jenkins pipeline:  
