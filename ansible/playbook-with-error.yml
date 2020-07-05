@@ -1,0 +1,21 @@
+# playbook to trigger debug mode
+---
+- name: Playbook with errors
+  # hosts: localhost
+  hosts: default
+  become: yes
+  debugger: on_failed
+
+  vars:
+    package_name: wrong_package_name
+    ping_data: crash
+
+  tasks:
+  - name: install package
+    apt:
+      name: "{{ package_name }}"
+
+  - name: ping
+    ping:
+      # if this parameter is set to crash, the module will cause an exception
+      data: "{{ ping_data }}"

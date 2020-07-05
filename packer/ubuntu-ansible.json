@@ -1,0 +1,85 @@
+{
+    "variables": {
+        "location": "uksouth",
+        "resource_group_name": "rg-packerdebug",
+        "image_name": "UbuntuAnsibleImage",
+        "vm_size": "Standard_DS2_v2",
+
+        "var_ssh_username": "sysadmin",
+        "var_ssh_private_key_file": "~/.ssh/id_rsa",
+
+        "tenant_id": "{{env `ARM_TENANT_ID`}}",
+        "subscription_id": "{{env `ARM_SUBSCRIPTION_ID`}}",
+        "client_id": "{{env `ARM_CLIENT_ID`}}",
+        "client_secret": "{{env `ARM_CLIENT_SECRET`}}"
+    },
+    "builders": [{
+      "type": "azure-arm",
+
+      "tenant_id": "{{user `tenant_id`}}",
+      "subscription_id": "{{user `subscription_id`}}",
+      "client_id": "{{user `client_id`}}",
+      "client_secret": "{{user `client_secret`}}",
+
+      "managed_image_resource_group_name": "{{user `resource_group_name`}}",
+      "managed_image_name": "{{user `image_name`}}",
+
+      "os_type": "Linux",
+      "image_publisher": "Canonical",
+      "image_offer": "UbuntuServer",
+      "image_sku": "18.04-LTS",
+
+      "azure_tags": {
+          "environment": "dev",
+          "engineer": "Adam Rush"
+      },
+
+      "location": "{{user `location`}}",
+      "vm_size": "{{user `vm_size`}}",
+
+      "ssh_username": "{{user `var_ssh_username`}}",
+      "ssh_private_key_file": "{{user `var_ssh_private_key_file`}}",
+
+      "async_resourcegroup_delete": true
+    }],
+    "provisioners": [
+        {
+            "type": "shell",
+            "inline": [
+                "echo 'This Shell provisioner step is: Pre Ansible'"
+            ]
+        },
+        {
+            "type":  "ansible",
+            "playbook_file": "{{ template_dir }}/../ansible/playbook-with-error.yml",
+            "user": "{{user `var_ssh_username`}}",
+            "use_proxy": false,
+            "keep_inventory_file": true,
+            "extra_arguments": [
+                "--extra-vars", "stdout_callback=yaml stderr_callback=yaml"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "echo 'This Shell provisioner step is: Post Ansible'"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline_shebang": "/bin/sh -x",
+            "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'",
+            "inline": [
+                "/usr/sbin/waagent -force -deprovision+user && export HISTSIZE=0 && sync"
+            ]
+        }
+    ],
+    "error-cleanup-provisioner": {
+        "type": "shell-local",
+        "inline": [
+            "echo 'Running [error-cleanup-provisioner] as an error occurred...'",
+            "echo 'Sleeping for 2h...'",
+            "sleep 2h"
+        ]
+    }
+}
